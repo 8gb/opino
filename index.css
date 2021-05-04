@@ -1,0 +1,56 @@
+.textarea {
+  border: 1px solid #dddddd;
+  height: 6rem;
+  padding: 20px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: inherit;
+  width: -webkit-fill-available;
+}
+
+.textareaWrapper {
+  width: 100%;
+}
+
+.error {
+  background: rgb(182, 24, 68);
+  background: linear-gradient(
+    106deg,
+    rgba(182, 24, 68, 1) 0%,
+    rgba(217, 28, 69, 1) 35%,
+    rgba(182, 24, 68, 1) 100%
+  );
+  color: white;
+  font-family: system-ui;
+}
+
+.msgbox {
+  border: 1px solid #dddddd;
+  margin-bottom: 10px;
+  padding: 20px;
+}
+
+.name {
+  padding: 10px;
+  font-size: inherit;
+  border: 1px solid #dddddd;
+}
+
+.marginLeft {
+  margin-left: 15px;
+}
+.button {
+  float: right;
+  padding: 10px 50px;
+  font-size: inherit;
+  border: 1px solid #dddddd;
+}
+
+.main {
+  font-family: system-ui;
+}
+.commentorDetails {
+  margin-bottom: 10px;
+}

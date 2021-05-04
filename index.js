@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import axios from 'axios'
+import styles from './index.css';
 
 // const LINK = `http://localhost:5000`
 const LINK = `https://api.opino.io`
@@ -52,19 +53,23 @@ function Example() {
 
   const [message, setMessage] = React.useState('');
   const [error, setError] = React.useState('');
+  const [commentorName, setCommentorName] = React.useState('');
+  const [loading, setLoading] = React.useState(true);
   const [listItems, setListItems] = React.useState([]);
 
 
   function ListItem(props) {
     var obj = props.value
     return (
-      <article class="message is-dark">
-        <div class="message-body">
-          <small class="mb-3 is-flex"><a href="" alt={props.id}>{obj.author}</a> • {timeSince(obj.timestamp)} ago</small>
-          {obj.message}
-          {/* <p class="has-text-right">reply</p> */}
-        </div>
-      </article>
+      <div
+        className={styles.msgbox}
+        >
+        <p
+        className={styles.commentorDetails}
+        ><a href={'#' + props.id}>{obj.author}</a> • {timeSince(obj.timestamp)} ago</p>
+        {obj.message}
+        {/* <p class="has-text-right">reply</p> */}
+      </div>
     );
   }
 
@@ -97,6 +102,8 @@ function Example() {
       }
     }
 
+    setLoading(false)
+
     //sorting
     arr.sort((a, b) => b.timestamp - a.timestamp)
 
@@ -113,23 +120,32 @@ function Example() {
       return
     }
 
+    let name = commentorName || 'Guest'
+
     let url = `${LINK}/add`
     let data = {
       siteName: SITENAME,
       pathName: slugify(window.location.pathname),
       message: message,
-      author: 'guest',
+      author: name,
       parent: ''
     }
+
+    let mm = 'unspecified error'
     try {
 
       const resp = await axios.post(url, data)
       console.log(resp.status);
-
+      mm = 'done'
     } catch (error) {
-      console.log(error);
+      if (error.response) {
+        mm = error.response.data
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      }
     }
-    alert('done')
+    alert(mm)
     setMessage('')
     getComments()
   }
@@ -140,17 +156,50 @@ function Example() {
 
   if (error) {
     return (
-      <div>{error}</div>
+      <div
+        className={styles.error}
+      >
+        <p
+          className={styles.name}
+        >opino.io error: {error}</p>
+      </div>
     )
   }
 
   return (
-    <div>
-      <textarea class="textarea" placeholder="Type your comment" value={message} onChange={e => setMessage(e.target.value)}></textarea>
-      <button class="button" onClick={async () => addComment()}>Comment</button>
-      <hr></hr>
-      <p>{listItems.length} comments</p>
-      {listItems}
+    <div
+      className={styles.main}
+    >
+      <div
+        className={styles.textareaWrapper}
+      >
+        <textarea
+          className={styles.textarea}
+          placeholder="Type your comment"
+          value={message}
+          onChange={e => setMessage(e.target.value)}
+          disabled={loading}
+        ></textarea>
+      </div>
+      {message &&
+        <div
+        >
+          <input className={styles.name} type="text" placeholder="Your name" value={commentorName} onChange={e => setCommentorName(e.target.value)}></input>
+          <button
+            className={styles.button}
+            disabled={loading}
+            onClick={async () => addComment()}>Post</button>
+        </div>
+      }
+      {!loading &&
+        <div>
+          <hr></hr>
+          <p
+            className={styles.marginLeft}
+          >{listItems.length} comments</p>
+          {listItems}
+        </div>
+      }
       <iframe src={CMSLINK} title="" style={{ position: 'absolute', width: 0, height: 0, border: 0 }}></iframe>
     </div>
   );

@@ -29,7 +29,7 @@ Add two lines of code, it's just that simple.
 
 ```
 <div id="cmt" data-opino-site="<<SITE_ID>>"></div>
-<script src="https://cdn.jsdelivr.net/gh/8gb/opino/dist/main.js"></script>
+<script src="https://cdn.opino.io/main.js"></script>
 ```
 <br/>
 Your comment widget is now live!
@@ -43,4 +43,4 @@ Try it out. 👇
 <br/>
     
 <div id="cmt" data-opino-site="001"></div>
-<script src="https://cdn.jsdelivr.net/gh/8gb/opino/dist/main.js"></script>
+<script src="https://cdn.opino.io/main.js"></script>
