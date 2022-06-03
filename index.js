@@ -4,8 +4,8 @@ import axios from 'axios'
 import styles from './index.css';
 
 // const LINK = `http://localhost:5000`
-const LINK = `https://api.opino.io`
-const CMSLINK = "https://app.opino.io"
+const LINK = `https://api.opino.ongclement.com`
+const CMSLINK = "https://app.opino.ongclement.com"
 
 const SITENAME = document.querySelector('#cmt').dataset.opinoSite
 console.log(`${SITENAME}`)
@@ -161,7 +161,7 @@ function Example() {
       >
         <p
           className={styles.name}
-        >opino.io error: {error}</p>
+        >opino.ongclement.com error: {error}</p>
       </div>
     )
   }

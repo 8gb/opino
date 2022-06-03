@@ -1,4 +1,4 @@
-# opino.io front end comment system component
+# opino.ongclement.com front end comment system component
 
 - still a work in progress.
 
@@ -22,4 +22,4 @@ Thank you for your interest, come back soon for more surprise.
 
 
 ## cdn link
-https://cdn.opino.io/main.js
+https://cdn.opino.ongclement.com/main.js
