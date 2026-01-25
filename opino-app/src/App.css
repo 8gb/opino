@@ -1,0 +1,179 @@
+/* @import 'antd/dist/antd.css'; */
+@import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+
+
+.w-500 {
+  width: 500px
+}
+
+/* .margin-low .ant-card-body {
+  background-color: #ddd !important;
+} */
+
+.margin-row {
+  margin: 0 10px 10px 0;
+}
+
+.gutter-box {
+  display: inline-block;
+  margin: 0 10px 10px 0;
+}
+
+#logoimg {
+  /* background-color: #333; */
+  /* max-width: 10px; do it inline on login.js */
+  margin: 0 auto;
+  padding: 0px;
+}
+
+.admintable {
+  overflow-x: scroll
+}
+
+h1 {
+  font-size: 36px;
+  display: inline-block;
+  margin-top: 15px;
+}
+
+.properp {
+  font-size: 16px !important;
+  display: inline
+}
+
+.App {
+  /* text-align: right; */
+  min-width: 500px;
+  display: block;
+  margin: 0 20px 20px 20px;
+  padding-top: 0;
+  /* background-color: #eee; */
+}
+
+/* body {
+  background-color: #eee;
+} */
+
+.ant-breadcrumb {
+  font-size: 16px !important
+}
+
+.crumbb .ant-card-body {
+  padding: 12px 24px;
+}
+
+.DraftEditor-root {
+  margin-bottom: 40px;
+  padding: 20px;
+  background-color: white;
+  border: 1px solid grey;
+}
+
+.ohh {
+  width: 600px;
+  min-height: 600px;
+  margin: 50px;
+  padding: 20px;
+}
+
+.nq {
+  float: left;
+
+}
+
+.np {
+  float: right;
+}
+
+.oh {
+  display: block;
+  margin-bottom: 0px
+}
+.margin-low .ant-card-body{
+  padding: 12px 24px;
+}
+
+.ant-input-number {
+  width: 100%;
+}
+
+.dash {
+  margin: 0 auto;
+}
+
+.loginform {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.inputforma {
+  width: 300px;
+  margin: 5px auto;
+}
+
+.buttona {
+  padding: 0 100px;
+  height: 60px;
+  margin-top: 15px;
+  margin-bottom: 25px;
+}
+
+.center-star {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70vh;
+
+}
+
+.editable-row .ant-form-explain {
+  position: absolute;
+  font-size: 12px;
+  margin-top: -4px;
+}
+
+
+
+/* UPLOAD button
+=========== */
+.upload-btn-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.upload-btn-wrapper input[type=file] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 25px;
+  /* cursor: pointer; */
+  opacity: 0;
+}
+
+/* Chrome/Safari and web-kit-based browsers 
+   (if it doesn't work, try maybe also on the parent/wrapper)
+*/
+::-webkit-file-upload-button {
+  cursor: pointer;
+}
+
+/* IE11 (if it doesn't work, try maybe also on the parent/wrapper) */
+input[type=file] {
+  cursor: pointer;
+}
+
+.csvbtn {
+  position: absolute;
+  margin-top: -45px;
+  right: 20px
+}
+
+.pw {
+  width: 350px;
+  margin-bottom: 10px;
+}
+
+.ant-layout {
+  background-color: white;
+}
