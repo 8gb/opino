@@ -30,8 +30,8 @@ export async function GET(request) {
     const { data: comments, error } = await supabaseAdmin
       .from('comments')
       .select('*')
-      .eq('siteName', siteName)
-      .eq('pathName', pathName);
+      .eq('sitename', siteName)
+      .eq('pathname', pathName);
 
     if (error) {
       console.error('getThread error:', error);

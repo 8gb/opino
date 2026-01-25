@@ -51,10 +51,10 @@ export async function POST(request) {
     }
 
     const comment = {
-      siteName,
+      sitename: siteName,
       message,
       timestamp: Date.now(),
-      pathName,
+      pathname: pathName,
       author,
       parent,
       uid: site.uid
