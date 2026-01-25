@@ -50,15 +50,19 @@ export async function POST(request) {
       return new NextResponse('invalid origin', { status: 400, headers: getCorsHeaders(origin) });
     }
 
+    console.log('Processing comment:', { siteName, message, author, parent });
+
     const comment = {
       sitename: siteName,
       message,
       timestamp: Date.now(),
       pathname: pathName,
       author,
-      parent,
+      parent: (parent && typeof parent === 'string' && parent.trim().length > 0) ? parent : null,
       uid: site.uid
     };
+
+    console.log('Inserting comment:', comment);
 
     const { error } = await supabaseAdmin.from('comments').insert(comment);
 
