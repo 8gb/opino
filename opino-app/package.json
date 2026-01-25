@@ -1,6 +1,7 @@
 {
   "name": "app.opino",
   "homepage": "https://app.opino.ongclement.com",
+  "description": "Privacy focused comment system for static website.",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

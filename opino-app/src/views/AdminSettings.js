@@ -7,8 +7,7 @@ const AdminSettings = () => {
   const [envProvider, setEnvProvider] = useState('unknown');
 
   useEffect(() => {
-    const env = process.env.NEXT_PUBLIC_AUTH_PROVIDER || 'supabase';
-    setEnvProvider(env);
+    setEnvProvider('supabase');
   }, []);
 
   return (
