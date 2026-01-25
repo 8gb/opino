@@ -1,5 +1,5 @@
 # Opino
-## Privacy Focused Comment System for Static Websites
+**Privacy Focused Comment System for Static Websites**
 
 Opino is a privacy-first, lightweight comment system designed specifically for static websites. It consists of a plug-and-play React widget and a secure, serverless backend.
 
@@ -48,7 +48,7 @@ Opino is built on a modern, serverless architecture designed for performance and
 graph TD
     subgraph Client ["Client Website"]
         Visitor[Visitor]
-        Widget[Opino Widget (React)]
+        Widget["Opino Widget (React)"]
     end
 
     subgraph Backend ["Opino Platform (Next.js)"]
