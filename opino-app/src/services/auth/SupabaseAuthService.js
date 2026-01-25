@@ -45,16 +45,6 @@ class SupabaseAuthService extends AuthInterface {
       });
       
       if (error) {
-        // Attempt migration login if standard login fails
-        if (error.message === 'Invalid login credentials' || error.status === 400) {
-           try {
-             return await this._loginWithMigration(email, password);
-           } catch (migrationErr) {
-             // If migration fails, throw the original error (or the migration error if preferred)
-             // We stick to original error to avoid leaking migration details if not relevant
-             throw error; 
-           }
-        }
         throw error;
       }
 
@@ -69,37 +59,6 @@ class SupabaseAuthService extends AuthInterface {
     }
   }
 
-  async _loginWithMigration(email, password) {
-    const response = await fetch('/api/auth/verify-migration', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || 'Migration login failed');
-    }
-
-    const { session, user } = await response.json();
-
-    // Set the session in the Supabase client
-    const { error } = await supabase.auth.setSession({
-      access_token: session.access_token,
-      refresh_token: session.refresh_token,
-    });
-
-    if (error) throw error;
-
-    MonitoringService.logEvent('login_migration_success', { provider: 'supabase' });
-    
-    return {
-      user: this._normalizeUser(user),
-      session,
-    };
-  }
 
   async loginWithProvider(providerName) {
     if (!supabase) throw new Error('Supabase not initialized');
@@ -145,6 +104,15 @@ class SupabaseAuthService extends AuthInterface {
     const { data, error } = await supabase.auth.updateUser({ password });
     if (error) throw error;
     return this._normalizeUser(data.user);
+  }
+
+  async resendVerificationEmail(email) {
+    if (!supabase) throw new Error('Supabase not initialized');
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
+    });
+    if (error) throw error;
   }
 
   /**

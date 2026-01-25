@@ -8,6 +8,7 @@
     "@ant-design/icons": "^4.6.2",
     "@marsidev/react-turnstile": "^1.4.1",
     "@supabase/supabase-js": "^2.91.1",
+    "@tailwindcss/postcss": "^4.1.18",
     "aes-js": "^3.1.2",
     "antd": "^6.2.1",
     "autoprefixer": "^10.4.23",

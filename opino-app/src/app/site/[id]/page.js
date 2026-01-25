@@ -1,7 +1,14 @@
 'use client';
+import { useParams } from 'next/navigation';
+import CommentsManager from '@/components/CommentsManager';
 import AuthGuard from '@/components/AuthGuard';
-import Comments from '@/views/comments';
 
 export default function SitePage() {
-  return <AuthGuard><Comments /></AuthGuard>;
+  const params = useParams();
+  
+  return (
+    <AuthGuard>
+      <CommentsManager initialSiteId={params?.id} />
+    </AuthGuard>
+  );
 }

@@ -10,8 +10,8 @@ class UserProvider extends Component {
 
   componentDidMount = () => {
     this.unsubscribe = authService.onAuthStateChanged(userAuth => {
-      console.log(JSON.stringify(userAuth))
-      this.setState({ user: userAuth});
+      // console.log(JSON.stringify(userAuth))
+      this.setState({ user: userAuth });
     });
   };
 
