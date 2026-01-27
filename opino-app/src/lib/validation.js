@@ -2,7 +2,10 @@ import { z } from 'zod';
 
 // Comment validation schema
 export const CommentSchema = z.object({
-  siteName: z.string().uuid('Invalid site ID'),
+  siteName: z.string()
+    .min(1, 'Site ID is required')
+    .max(100, 'Site ID too long')
+    .regex(/^[a-z0-9\-_]+$/i, 'Invalid site ID format'),
   pathName: z.string()
     .min(1, 'Path is required')
     .max(500, 'Path too long')
@@ -34,14 +37,26 @@ export const SiteSchema = z.object({
 // Validation helper
 export function validate(schema, data) {
   try {
-    return { success: true, data: schema.parse(data) };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+    const result = schema.safeParse(data);
+
+    if (result.success) {
+      return { success: true, data: result.data };
+    } else {
+      // Handle validation failure
+      const errorMessages = result.error?.errors && Array.isArray(result.error.errors)
+        ? result.error.errors.map(e => e.message || String(e)).join(', ')
+        : result.error?.message || 'Validation failed';
+
       return {
         success: false,
-        error: error.errors.map(e => e.message).join(', ')
+        error: errorMessages
       };
     }
-    throw error;
+  } catch (error) {
+    // Fallback for unexpected errors
+    return {
+      success: false,
+      error: error?.message || 'Validation error'
+    };
   }
 }

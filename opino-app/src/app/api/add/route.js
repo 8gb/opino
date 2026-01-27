@@ -71,13 +71,21 @@ export async function POST(request) {
   }
 
   // Validate input
-  const validation = validate(CommentSchema, {
-    siteName,
-    pathName: body.pathName,
-    message: body.message,
-    author: body.author,
-    parent: body.parent,
-  });
+  let validation;
+  try {
+    validation = validate(CommentSchema, {
+      siteName,
+      pathName: body.pathName,
+      message: body.message,
+      author: body.author,
+      parent: body.parent,
+    });
+  } catch (e) {
+    return new NextResponse('Validation error: ' + (e?.message || 'Invalid input'), {
+      status: 400,
+      headers: getCorsHeaders(origin)
+    });
+  }
 
   if (!validation.success) {
     return new NextResponse(validation.error, {
