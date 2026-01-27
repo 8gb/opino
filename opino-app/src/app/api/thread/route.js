@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import supabaseAdmin from '@/lib/supabase-server';
 import { getSite, checkOrigin, getCorsHeaders } from '@/lib/api-utils';
 import { rateLimiters, checkRateLimit } from '@/lib/rate-limit';
+import { getCached, cacheKeys, CACHE_TTL } from '@/lib/cache';
 
 export const runtime = 'edge';
 
@@ -69,17 +70,27 @@ export async function GET(request) {
       return new NextResponse('missing origin header', { status: 400, headers: getCorsHeaders(origin) });
     }
 
-    const { data: comments, error } = await supabaseAdmin
-      .from('comments')
-      .select('*')
-      .eq('sitename', siteName)
-      .eq('pathname', pathName);
+    // Use cache for comments (5 minutes TTL)
+    const comments = await getCached(
+      cacheKeys.comments(siteName, pathName),
+      async () => {
+        const { data, error } = await supabaseAdmin
+          .from('comments')
+          .select('*')
+          .eq('sitename', siteName)
+          .eq('pathname', pathName)
+          .order('timestamp', { ascending: false });
 
-    if (error) {
-      return new NextResponse('Error fetching comments', { status: 500, headers: getCorsHeaders(origin) });
-    }
+        if (error) {
+          throw new Error('Error fetching comments');
+        }
 
-    return NextResponse.json(comments || [], { headers: getCorsHeaders(origin) });
+        return data || [];
+      },
+      CACHE_TTL.COMMENTS
+    );
+
+    return NextResponse.json(comments, { headers: getCorsHeaders(origin) });
 
   } catch (e) {
     return new NextResponse('Internal Server Error', { status: 500, headers: getCorsHeaders(origin) });

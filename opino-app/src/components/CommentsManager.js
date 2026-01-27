@@ -16,6 +16,14 @@ export default function CommentsManager({ initialSiteId }) {
     const [siteFilter, setSiteFilter] = useState(initialSiteId || 'all');
     const [sites, setSites] = useState([]);
     const [selectedComments, setSelectedComments] = useState([]);
+    const [page, setPage] = useState(1);
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 50,
+        total: 0,
+        totalPages: 0,
+        hasMore: false
+    });
 
     // Fetch Sites for Filter
     useEffect(() => {
@@ -43,7 +51,7 @@ export default function CommentsManager({ initialSiteId }) {
     }, [user]);
 
     // Fetch Comments
-    const fetchComments = async () => {
+    const fetchComments = async (currentPage = page) => {
         if (!user || user === 'loading') return;
         setLoading(true);
         try {
@@ -55,6 +63,8 @@ export default function CommentsManager({ initialSiteId }) {
             if (siteFilter && siteFilter !== 'all') {
                 params.append('siteId', siteFilter);
             }
+            params.append('page', currentPage.toString());
+            params.append('limit', '50');
 
             const res = await fetch(`/api/comments?${params.toString()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -62,8 +72,16 @@ export default function CommentsManager({ initialSiteId }) {
 
             if (!res.ok) throw new Error('Failed to fetch comments');
 
-            const comments = await res.json();
-            setData(comments || []);
+            const response = await res.json();
+
+            // Handle paginated response
+            if (response.data && response.pagination) {
+                setData(response.data || []);
+                setPagination(response.pagination);
+            } else {
+                // Fallback for non-paginated response
+                setData(response || []);
+            }
         } catch (error) {
             logger.error('Failed to fetch comments:', error.message);
         } finally {
@@ -72,8 +90,26 @@ export default function CommentsManager({ initialSiteId }) {
     };
 
     useEffect(() => {
-        fetchComments();
+        setPage(1); // Reset to page 1 when filter changes
+        fetchComments(1);
     }, [user, siteFilter]);
+
+    // Handle pagination
+    const handleNextPage = () => {
+        if (pagination.hasMore) {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            fetchComments(nextPage);
+        }
+    };
+
+    const handlePreviousPage = () => {
+        if (page > 1) {
+            const prevPage = page - 1;
+            setPage(prevPage);
+            fetchComments(prevPage);
+        }
+    };
 
     // Update siteFilter if initialSiteId changes
     useEffect(() => {
@@ -275,10 +311,28 @@ export default function CommentsManager({ initialSiteId }) {
                 </div>
                 {/* Pagination Footer */}
                 <div className="flex items-center justify-between p-4 border-t border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-surface-dark/80">
-                    <span className="text-sm text-slate-500 dark:text-text-secondary">Showing {filteredData.length} records</span>
+                    <span className="text-sm text-slate-500 dark:text-text-secondary">
+                        Showing {((page - 1) * pagination.limit) + 1} to {Math.min(page * pagination.limit, pagination.total)} of {pagination.total} records
+                        {searchText && ` (filtered: ${filteredData.length})`}
+                    </span>
                     <div className="flex items-center gap-2">
-                        <button className="px-3 py-1.5 rounded border border-slate-200 dark:border-border-dark text-sm text-slate-500 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-border-dark transition-colors disabled:opacity-50" disabled>Previous</button>
-                        <button className="px-3 py-1.5 rounded border border-slate-200 dark:border-border-dark text-sm text-slate-500 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-border-dark transition-colors">Next</button>
+                        <button
+                            className="px-3 py-1.5 rounded border border-slate-200 dark:border-border-dark text-sm text-slate-500 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-border-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={page <= 1}
+                            onClick={handlePreviousPage}
+                        >
+                            Previous
+                        </button>
+                        <span className="text-sm text-slate-500 dark:text-text-secondary px-2">
+                            Page {page} of {pagination.totalPages || 1}
+                        </span>
+                        <button
+                            className="px-3 py-1.5 rounded border border-slate-200 dark:border-border-dark text-sm text-slate-500 dark:text-text-secondary hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-border-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={!pagination.hasMore}
+                            onClick={handleNextPage}
+                        >
+                            Next
+                        </button>
                     </div>
                 </div>
             </div>

@@ -3,11 +3,14 @@ import ReactDOM from 'react-dom'
 import DOMPurify from 'dompurify'
 import styles from './index.css';
 
-// const LINK = `http://localhost:5000`
-const LINK = `https://api.opino.ongclement.com`
+// Configuration: API URL is now configurable via data attribute or global variable
+const cmtElement = document.querySelector('#cmt');
+const LINK = cmtElement.dataset.opinoApi ||
+             window.OPINO_API_URL ||
+             'https://api.opino.ongclement.com';
 
-const SITENAME = document.querySelector('#cmt').dataset.opinoSite
-const TURNSTILE_SITE_KEY = document.querySelector('#cmt').dataset.opinoTurnstile || ''
+const SITENAME = cmtElement.dataset.opinoSite;
+const TURNSTILE_SITE_KEY = cmtElement.dataset.opinoTurnstile || '';
 
 function slugify(text) {
   return text.toString().toLowerCase().trim()

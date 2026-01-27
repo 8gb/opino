@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import supabaseAdmin from '@/lib/supabase-server';
 import { withAuth } from '@/lib/auth-middleware';
+import { invalidateCache, invalidateCachePattern, cacheKeys } from '@/lib/cache';
 
 export const DELETE = withAuth(async (request, { user, params }) => {
   const { id } = await params;
 
   try {
-    // Verify ownership
-    let checkQuery = supabaseAdmin.from('comments').select('id').eq('id', id);
+    // Get comment details before deleting (for cache invalidation)
+    let checkQuery = supabaseAdmin.from('comments').select('*').eq('id', id);
     checkQuery = checkQuery.eq('uid', user.uid);
     const { data: existing } = await checkQuery.single();
 
@@ -18,6 +19,13 @@ export const DELETE = withAuth(async (request, { user, params }) => {
     const { error } = await supabaseAdmin.from('comments').delete().eq('id', id);
 
     if (error) throw error;
+
+    // Invalidate cache for this thread
+    if (existing.sitename && existing.pathname) {
+      await invalidateCache(cacheKeys.comments(existing.sitename, existing.pathname));
+    }
+    // Invalidate user's comment list cache
+    await invalidateCachePattern(`comments:list:${user.uid}:*`);
 
     return NextResponse.json({ success: true });
   } catch (error) {

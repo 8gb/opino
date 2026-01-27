@@ -4,6 +4,7 @@ import { getSite, checkOrigin, getCorsHeaders } from '@/lib/api-utils';
 import { CommentSchema, validate } from '@/lib/validation';
 import { rateLimiters, checkRateLimit } from '@/lib/rate-limit';
 import { verifyCaptcha } from '@/lib/captcha';
+import { invalidateCache, invalidateCachePattern, cacheKeys } from '@/lib/cache';
 
 export const runtime = 'edge';
 
@@ -140,6 +141,11 @@ export async function POST(request) {
     if (error) {
       return new NextResponse('Error adding comment', { status: 500, headers: getCorsHeaders(origin) });
     }
+
+    // Invalidate cache for this thread after adding comment
+    await invalidateCache(cacheKeys.comments(siteName, pathName));
+    // Also invalidate user's comment list cache
+    await invalidateCachePattern(`comments:list:${site.uid}:*`);
 
     return new NextResponse(null, { status: 200, headers: getCorsHeaders(origin) });
 
