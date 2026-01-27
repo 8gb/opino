@@ -51,6 +51,7 @@ function Example() {
   const [error, setError] = React.useState('');
   const [commentorName, setCommentorName] = React.useState('');
   const [loading, setLoading] = React.useState(true);
+  const [submitting, setSubmitting] = React.useState(false);
   const [listItems, setListItems] = React.useState([]);
   const [captchaToken, setCaptchaToken] = React.useState(null);
   const turnstileRef = React.useRef(null);
@@ -134,6 +135,8 @@ function Example() {
       return
     }
 
+    setSubmitting(true)
+
     let name = commentorName || 'Guest'
 
     let url = `${LINK}/add`
@@ -162,6 +165,8 @@ function Example() {
       }
     } catch (error) {
       mm = error.message || 'Error posting comment'
+    } finally {
+      setSubmitting(false)
     }
     alert(mm)
     setMessage('')
@@ -228,8 +233,10 @@ function Example() {
           )}
           <button
             className={styles.button}
-            disabled={loading}
-            onClick={async () => addComment()}>Post</button>
+            disabled={loading || submitting}
+            onClick={async () => addComment()}>
+            {submitting ? 'Posting...' : 'Post'}
+          </button>
         </div>
       }
       {!loading &&
