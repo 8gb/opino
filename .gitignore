@@ -62,3 +62,5 @@ webpack.config.js
 
 remoteconfig.template.json
 .netlify
+
+internal

@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import supabaseAdmin from '@/lib/supabase-server';
 import { getSite, checkOrigin, getCorsHeaders } from '@/lib/api-utils';
+import { CommentSchema, validate } from '@/lib/validation';
+import { rateLimiters, checkRateLimit } from '@/lib/rate-limit';
+import { verifyCaptcha } from '@/lib/captcha';
 
 export const runtime = 'edge';
 
@@ -8,7 +11,18 @@ export async function POST(request) {
   const { searchParams } = new URL(request.url);
   const querySiteName = searchParams.get('siteName');
   const origin = request.headers.get('origin');
-  
+
+  // Rate limiting
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'anonymous';
+  const { success, headers } = await checkRateLimit(rateLimiters?.comment, ip);
+
+  if (!success) {
+    return new NextResponse('Too Many Requests', {
+      status: 429,
+      headers: { ...getCorsHeaders(origin), ...headers },
+    });
+  }
+
   let body;
   try {
     body = await request.json();
@@ -17,14 +31,12 @@ export async function POST(request) {
   }
   
   // body.siteName can override query if logic allows, but here we check consistency
-  const siteName = body.siteName || querySiteName; 
+  const siteName = body.siteName || querySiteName;
   // Wait, original logic:
   // req.query.siteName && (siteName = req.query.siteName)
   // req.body.siteName && (siteName = req.body.siteName)
   // So body takes precedence.
-  
-  const { pathName, message, author, parent } = body;
-  
+
   if (!siteName) {
       return new NextResponse('invalid sitename', { status: 400, headers: getCorsHeaders(origin) });
   }
@@ -32,10 +44,34 @@ export async function POST(request) {
   if (querySiteName && body.siteName && (querySiteName !== body.siteName)) {
     return new NextResponse('query and body sitename is not the same', { status: 400, headers: getCorsHeaders(origin) });
   }
-  
-  if (!message) {
-      console.log('no message');
-      return new NextResponse(null, { status: 200, headers: getCorsHeaders(origin) });
+
+  // Validate input
+  const validation = validate(CommentSchema, {
+    siteName,
+    pathName: body.pathName,
+    message: body.message,
+    author: body.author,
+    parent: body.parent,
+  });
+
+  if (!validation.success) {
+    return new NextResponse(validation.error, {
+      status: 400,
+      headers: getCorsHeaders(origin)
+    });
+  }
+
+  const { pathName, message, author, parent } = validation.data;
+
+  // Verify captcha if token is provided
+  if (body.captchaToken) {
+    const captchaValid = await verifyCaptcha(body.captchaToken);
+    if (!captchaValid) {
+      return new NextResponse('Invalid captcha', {
+        status: 400,
+        headers: getCorsHeaders(origin)
+      });
+    }
   }
 
   try {
@@ -46,11 +82,8 @@ export async function POST(request) {
     }
 
     if (!checkOrigin(origin, site.domain)) {
-      console.log('INVALID ORIGIN', origin, site.domain);
       return new NextResponse('invalid origin', { status: 400, headers: getCorsHeaders(origin) });
     }
-
-    console.log('Processing comment:', { siteName, message, author, parent });
 
     const comment = {
       sitename: siteName,
@@ -62,19 +95,15 @@ export async function POST(request) {
       uid: site.uid
     };
 
-    console.log('Inserting comment:', comment);
-
     const { error } = await supabaseAdmin.from('comments').insert(comment);
 
     if (error) {
-      console.error('addComment error:', error);
       return new NextResponse('Error adding comment', { status: 500, headers: getCorsHeaders(origin) });
     }
 
     return new NextResponse(null, { status: 200, headers: getCorsHeaders(origin) });
 
   } catch (e) {
-    console.error('POST /add error:', e);
     return new NextResponse('Internal Server Error', { status: 500, headers: getCorsHeaders(origin) });
   }
 }

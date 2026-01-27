@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import supabaseAdmin from '@/lib/supabase-server';
 import { getUserFromRequest } from '@/lib/get-user';
+import { SiteSchema, validate } from '@/lib/validation';
 
 export async function GET(request) {
   const user = await getUserFromRequest(request);
@@ -43,11 +44,14 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const { domain } = body;
 
-    if (!domain) {
-      return NextResponse.json({ error: 'Domain is required' }, { status: 400 });
+    // Validate domain
+    const validation = validate(SiteSchema, body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
+
+    const { domain } = validation.data;
 
     const newSite = {
       id: crypto.randomUUID(),

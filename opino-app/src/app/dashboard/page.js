@@ -42,7 +42,9 @@ function DashboardContent() {
                 });
                 setRecentSites(data.recentSites || []);
             } catch (error) {
-                console.error('Error fetching dashboard data:', error);
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Error fetching dashboard data:', error);
+                }
             } finally {
                 setLoading(false);
             }

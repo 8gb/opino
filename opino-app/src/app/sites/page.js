@@ -44,7 +44,9 @@ function SitesContent() {
             const sites = await res.json();
             setData(sites || []);
         } catch (error) {
-            console.error('Failed to fetch sites:', error.message);
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Failed to fetch sites:', error.message);
+            }
             // message.error('Failed to load sites'); // Removed ant design message dependency
         } finally {
             setLoading(false);
@@ -83,7 +85,9 @@ function SitesContent() {
             setNewSiteDomain('');
             fetchSites();
         } catch (error) {
-            console.error('Error adding site:', error.message);
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Error adding site:', error.message);
+            }
         }
     };
 
@@ -104,7 +108,9 @@ function SitesContent() {
             if (!res.ok) throw new Error('Failed to delete site');
             fetchSites();
         } catch (error) {
-            console.error('Error deleting site:', error.message);
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Error deleting site:', error.message);
+            }
         }
     };
 
@@ -129,7 +135,9 @@ function SitesContent() {
             setEditingKey('');
             fetchSites();
         } catch (error) {
-            console.error('Error updating domain:', error.message);
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Error updating domain:', error.message);
+            }
         }
     }
 

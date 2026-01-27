@@ -1,14 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import axios from 'axios'
+import DOMPurify from 'dompurify'
 import styles from './index.css';
 
 // const LINK = `http://localhost:5000`
 const LINK = `https://api.opino.ongclement.com`
-const CMSLINK = "https://app.opino.ongclement.com"
 
 const SITENAME = document.querySelector('#cmt').dataset.opinoSite
-console.log(`${SITENAME}`)
+const TURNSTILE_SITE_KEY = document.querySelector('#cmt').dataset.opinoTurnstile || ''
 
 function slugify(text) {
   return text.toString().toLowerCase().trim()
@@ -16,8 +15,6 @@ function slugify(text) {
     .replace(/[\s\W-]+/g, '-')
     .replace(/[^a-zA-Z0-9-_]+/g, '');
 }
-
-console.log(slugify(window.location.pathname));
 
 function timeSince(date) {
 
@@ -48,7 +45,6 @@ function timeSince(date) {
 }
 
 
-//todo: xss filter
 function Example() {
 
   const [message, setMessage] = React.useState('');
@@ -56,18 +52,34 @@ function Example() {
   const [commentorName, setCommentorName] = React.useState('');
   const [loading, setLoading] = React.useState(true);
   const [listItems, setListItems] = React.useState([]);
+  const [captchaToken, setCaptchaToken] = React.useState(null);
+  const turnstileRef = React.useRef(null);
 
 
   function ListItem(props) {
     var obj = props.value
+
+    // Sanitize author - strip ALL HTML
+    var safeAuthor = DOMPurify.sanitize(obj.author || 'Anonymous', {
+      ALLOWED_TAGS: [],
+      ALLOWED_ATTR: []
+    });
+
+    // Sanitize message - allow limited safe HTML
+    var safeMessage = DOMPurify.sanitize(obj.message || '', {
+      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br', 'a', 'code', 'pre', 'ul', 'ol', 'li'],
+      ALLOWED_ATTR: ['href'],
+      ALLOW_DATA_ATTR: false
+    });
+
     return (
       <div
         className={styles.msgbox}
         >
         <p
         className={styles.commentorDetails}
-        ><a href={'#' + props.id}>{obj.author}</a> • {timeSince(obj.timestamp)} ago</p>
-        {obj.message}
+        ><a href={'#' + props.id}>{safeAuthor}</a> • {timeSince(obj.timestamp)} ago</p>
+        <div dangerouslySetInnerHTML={{ __html: safeMessage }} />
         {/* <p class="has-text-right">reply</p> */}
       </div>
     );
@@ -90,16 +102,12 @@ function Example() {
     let arr = []
     try {
 
-      const resp = await axios.get(url)
-      arr = resp.data
+      const resp = await fetch(url)
+      if (!resp.ok) throw new Error(resp.statusText)
+      arr = await resp.json()
 
     } catch (error) {
-      if (error.response) {
-        setError(error.response.data)
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      }
+      setError(error.message || 'Error loading comments')
     }
 
     setLoading(false)
@@ -120,6 +128,12 @@ function Example() {
       return
     }
 
+    // Check captcha if configured
+    if (TURNSTILE_SITE_KEY && !captchaToken) {
+      alert('Please complete the captcha verification')
+      return
+    }
+
     let name = commentorName || 'Guest'
 
     let url = `${LINK}/add`
@@ -128,30 +142,48 @@ function Example() {
       pathName: slugify(window.location.pathname),
       message: message,
       author: name,
-      parent: ''
+      parent: '',
+      captchaToken: captchaToken
     }
 
     let mm = 'unspecified error'
     try {
 
-      const resp = await axios.post(url, data)
-      console.log(resp.status);
-      mm = 'done'
-    } catch (error) {
-      if (error.response) {
-        mm = error.response.data
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      if (!resp.ok) {
+        const errorText = await resp.text()
+        mm = errorText || resp.statusText
+      } else {
+        mm = 'done'
       }
+    } catch (error) {
+      mm = error.message || 'Error posting comment'
     }
     alert(mm)
     setMessage('')
+    setCaptchaToken(null)
+    // Reset Turnstile widget if it exists
+    if (TURNSTILE_SITE_KEY && window.turnstile && turnstileRef.current) {
+      window.turnstile.reset(turnstileRef.current)
+    }
     getComments()
   }
 
   React.useEffect(() => {
     getComments()
+
+    // Load Turnstile script if configured
+    if (TURNSTILE_SITE_KEY && !window.turnstile) {
+      const script = document.createElement('script')
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+      script.async = true
+      script.defer = true
+      document.head.appendChild(script)
+    }
   }, []);
 
   if (error) {
@@ -185,6 +217,15 @@ function Example() {
         <div
         >
           <input className={styles.name} type="text" placeholder="Your name" value={commentorName} onChange={e => setCommentorName(e.target.value)}></input>
+          {TURNSTILE_SITE_KEY && (
+            <div
+              ref={turnstileRef}
+              className="cf-turnstile"
+              data-sitekey={TURNSTILE_SITE_KEY}
+              data-callback={(token) => setCaptchaToken(token)}
+              data-theme="light"
+            ></div>
+          )}
           <button
             className={styles.button}
             disabled={loading}
@@ -200,7 +241,6 @@ function Example() {
           {listItems}
         </div>
       }
-      <iframe src={CMSLINK} title="" style={{ position: 'absolute', width: 0, height: 0, border: 0 }}></iframe>
     </div>
   );
 }

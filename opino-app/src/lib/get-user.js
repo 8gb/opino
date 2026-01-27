@@ -8,9 +8,8 @@ export async function getUserFromRequest(request) {
   if (!token) return null;
 
   const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-  
+
   if (error || !user) {
-    console.error('Auth error:', error);
     return null;
   }
   

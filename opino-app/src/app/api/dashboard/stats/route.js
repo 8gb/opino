@@ -34,7 +34,6 @@ export async function GET(request) {
     });
 
   } catch (error) {
-    console.error('Dashboard stats error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
