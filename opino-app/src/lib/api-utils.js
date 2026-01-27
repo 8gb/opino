@@ -70,15 +70,38 @@ export function checkOrigin(origin, registeredDomain) {
   }
 }
 
+// Allowed origins for dashboard API
+const ALLOWED_ORIGINS_FOR_DASHBOARD = [
+  process.env.NEXT_PUBLIC_APP_URL,
+  'http://localhost:3000',
+  'https://localhost:3000',
+].filter(Boolean);
+
+/**
+ * Get CORS headers based on API type
+ * @param {string} origin - Request origin
+ * @param {boolean} isPublicApi - Whether this is a public widget API
+ * @returns {Object} CORS headers
+ */
 export function getCorsHeaders(origin, isPublicApi = true) {
-  // For public widget API - only allow if origin is provided
-  // Never fall back to '*' for authenticated endpoints
-  const allowedOrigin = origin || (isPublicApi ? '*' : '');
+  // For public widget API - allow registered site origins
+  if (isPublicApi) {
+    return {
+      'Access-Control-Allow-Origin': origin || '',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400',
+    };
+  }
+
+  // For dashboard API - strict origin checking
+  const allowedOrigin = ALLOWED_ORIGINS_FOR_DASHBOARD.includes(origin) ? origin : '';
 
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Max-Age': '86400',
   };
 }

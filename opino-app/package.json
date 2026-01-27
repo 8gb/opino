@@ -20,7 +20,6 @@
     "dotenv": "^17.2.3",
     "draftjs-to-html": "^0.8.4",
     "html-to-draftjs": "^1.4.0",
-    "moment": "latest",
     "next": "^16.1.4",
     "papaparse": "^4.6.3",
     "pg": "^8.17.2",
@@ -42,8 +41,8 @@
     "lint": "next lint"
   },
   "engines": {
-    "node": ">= 12.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">= 18.0.0",
+    "npm": ">= 8.0.0"
   },
   "browserslist": {
     "production": [

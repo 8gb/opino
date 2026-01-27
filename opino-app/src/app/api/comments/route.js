@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server';
 import supabaseAdmin from '@/lib/supabase-server';
-import { getUserFromRequest } from '@/lib/get-user';
+import { withAuth } from '@/lib/auth-middleware';
 
-export async function GET(request) {
-  const user = await getUserFromRequest(request);
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export const GET = withAuth(async (request, { user }) => {
   const { searchParams } = new URL(request.url);
   const siteFilter = searchParams.get('siteId');
 
@@ -28,4 +23,4 @@ export async function GET(request) {
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-}
+});

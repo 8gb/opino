@@ -1,14 +1,9 @@
 import { NextResponse } from 'next/server';
 import supabaseAdmin from '@/lib/supabase-server';
-import { getUserFromRequest } from '@/lib/get-user';
+import { withAuth } from '@/lib/auth-middleware';
 import { SiteSchema, validate } from '@/lib/validation';
 
-export async function GET(request) {
-  const user = await getUserFromRequest(request);
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export const GET = withAuth(async (request, { user }) => {
   try {
     // 1. Fetch sites first
     let query = supabaseAdmin.from('sites').select('*');
@@ -23,7 +18,7 @@ export async function GET(request) {
             .from('comments')
             .select('*', { count: 'exact', head: true })
             .eq('sitename', site.id);
-        
+
         return {
             ...site,
             comments: [{ count: count || 0 }]
@@ -34,14 +29,9 @@ export async function GET(request) {
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(request) {
-  const user = await getUserFromRequest(request);
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export const POST = withAuth(async (request, { user }) => {
   try {
     const body = await request.json();
 
@@ -67,4 +57,4 @@ export async function POST(request) {
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-}
+});

@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server';
 import supabaseAdmin from '@/lib/supabase-server';
-import { getUserFromRequest } from '@/lib/get-user';
+import { withAuth } from '@/lib/auth-middleware';
 
-export async function DELETE(request, { params }) {
-  const user = await getUserFromRequest(request);
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export const DELETE = withAuth(async (request, { user, params }) => {
   const { id } = await params;
 
   try {
@@ -28,4 +23,4 @@ export async function DELETE(request, { params }) {
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-}
+});
