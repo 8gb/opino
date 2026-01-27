@@ -1,5 +1,6 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { logger } from './logger';
 
 // Initialize Redis (will use UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN from env)
 let redis;
@@ -8,7 +9,7 @@ try {
 } catch (e) {
   // Redis not configured - rate limiting will be disabled
   if (process.env.NODE_ENV === 'development') {
-    console.warn('Upstash Redis not configured. Rate limiting is disabled.');
+    logger.warn('Upstash Redis not configured. Rate limiting is disabled.');
   }
 }
 

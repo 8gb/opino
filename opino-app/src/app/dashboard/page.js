@@ -4,6 +4,7 @@ import { UserContext } from '@/UserProvider';
 import supabase from '@/services/supabase/client';
 import Link from 'next/link';
 import AuthGuard from '@/components/AuthGuard';
+import { logger } from '@/lib/logger';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -42,9 +43,7 @@ function DashboardContent() {
                 });
                 setRecentSites(data.recentSites || []);
             } catch (error) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.error('Error fetching dashboard data:', error);
-                }
+                logger.error('Error fetching dashboard data:', error);
             } finally {
                 setLoading(false);
             }

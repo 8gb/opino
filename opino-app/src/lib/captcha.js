@@ -1,3 +1,5 @@
+import { logger } from './logger';
+
 /**
  * Verifies a Cloudflare Turnstile captcha token
  * @param {string} token - The captcha token from the client
@@ -10,7 +12,7 @@ export async function verifyCaptcha(token) {
   // This allows the app to work without captcha during development
   if (!secretKey) {
     if (process.env.NODE_ENV === 'development') {
-      console.warn('Turnstile secret key not configured. Captcha verification is disabled.');
+      logger.warn('Turnstile secret key not configured. Captcha verification is disabled.');
     }
     return true; // Allow in development/when not configured
   }

@@ -4,6 +4,7 @@ import supabase from '@/services/supabase/client';
 import { UserContext } from '@/UserProvider';
 import AuthGuard from '@/components/AuthGuard';
 import { useRouter } from 'next/navigation';
+import { logger } from '@/lib/logger';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -44,9 +45,7 @@ function SitesContent() {
             const sites = await res.json();
             setData(sites || []);
         } catch (error) {
-            if (process.env.NODE_ENV === 'development') {
-                console.error('Failed to fetch sites:', error.message);
-            }
+            logger.error('Failed to fetch sites:', error.message);
             // message.error('Failed to load sites'); // Removed ant design message dependency
         } finally {
             setLoading(false);
@@ -86,7 +85,7 @@ function SitesContent() {
             fetchSites();
         } catch (error) {
             if (process.env.NODE_ENV === 'development') {
-                console.error('Error adding site:', error.message);
+                logger.error('Error adding site:', error.message);
             }
         }
     };
@@ -109,7 +108,7 @@ function SitesContent() {
             fetchSites();
         } catch (error) {
             if (process.env.NODE_ENV === 'development') {
-                console.error('Error deleting site:', error.message);
+                logger.error('Error deleting site:', error.message);
             }
         }
     };
@@ -136,7 +135,7 @@ function SitesContent() {
             fetchSites();
         } catch (error) {
             if (process.env.NODE_ENV === 'development') {
-                console.error('Error updating domain:', error.message);
+                logger.error('Error updating domain:', error.message);
             }
         }
     }

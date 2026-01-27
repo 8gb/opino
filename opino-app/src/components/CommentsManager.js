@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import supabase from '@/services/supabase/client';
 import { UserContext } from '@/UserProvider';
+import { logger } from '@/lib/logger';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -35,9 +36,7 @@ export default function CommentsManager({ initialSiteId }) {
                 const sites = await res.json();
                 setSites(sites || []);
             } catch (error) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.error('Fetch sites error:', error);
-                }
+                logger.error('Fetch sites error:', error);
             }
         };
         fetchSites();
@@ -66,9 +65,7 @@ export default function CommentsManager({ initialSiteId }) {
             const comments = await res.json();
             setData(comments || []);
         } catch (error) {
-            if (process.env.NODE_ENV === 'development') {
-                console.error('Failed to fetch comments:', error.message);
-            }
+            logger.error('Failed to fetch comments:', error.message);
         } finally {
             setLoading(false);
         }
@@ -101,9 +98,7 @@ export default function CommentsManager({ initialSiteId }) {
             if (!res.ok) throw new Error('Failed to delete comment');
             fetchComments(); // Refresh
         } catch (error) {
-            if (process.env.NODE_ENV === 'development') {
-                console.error('Error deleting comment:', error.message);
-            }
+            logger.error('Error deleting comment:', error.message);
         }
     };
 
