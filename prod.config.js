@@ -32,7 +32,6 @@ var config = {
 var barConfig = Object.assign({}, config, {
   name: "b",
   mode: 'production',
-  watch: true,
   entry: './index.js',
   output: {
     path: path.resolve(__dirname, "dist"),

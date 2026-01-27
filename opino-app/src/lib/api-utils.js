@@ -24,11 +24,25 @@ export async function getSite(siteName) {
  * Supports exact match and valid subdomains only.
  */
 export function checkOrigin(origin, registeredDomain) {
+  // Return false if either parameter is missing or invalid
+  if (!origin || !registeredDomain || typeof origin !== 'string' || typeof registeredDomain !== 'string') {
+    return false;
+  }
+
+  // Trim whitespace
+  origin = origin.trim();
+  registeredDomain = registeredDomain.trim();
+
   if (!origin || !registeredDomain) {
     return false;
   }
 
   try {
+    // Ensure origin is a valid URL (must have protocol)
+    if (!origin.startsWith('http://') && !origin.startsWith('https://')) {
+      return false;
+    }
+
     const originUrl = new URL(origin);
     const originHost = originUrl.hostname.toLowerCase();
 

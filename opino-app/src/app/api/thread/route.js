@@ -6,14 +6,39 @@ import { rateLimiters, checkRateLimit } from '@/lib/rate-limit';
 export const runtime = 'edge';
 
 export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const siteName = searchParams.get('siteName');
-  const pathName = searchParams.get('pathName');
-  const origin = request.headers.get('origin');
+  // Wrap everything in try-catch to handle any parsing errors
+  let siteName, pathName, origin, ip;
 
-  // Rate limiting
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'anonymous';
-  const { success, headers } = await checkRateLimit(rateLimiters?.thread, ip);
+  try {
+    const { searchParams } = new URL(request.url);
+    siteName = searchParams.get('siteName');
+    pathName = searchParams.get('pathName');
+
+    // Get and sanitize origin header
+    origin = request.headers.get('origin');
+    if (origin && typeof origin === 'string') {
+      origin = origin.trim();
+      // If origin looks malformed, set to null
+      if (!origin.match(/^https?:\/\/[a-z0-9.-]+/i) || origin.length > 500) {
+        origin = null;
+      }
+    }
+
+    ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'anonymous';
+  } catch (e) {
+    // Return early if we can't even parse the request
+    return new NextResponse('Invalid request format', { status: 400 });
+  }
+
+  // Rate limiting (with error handling)
+  let rateLimitResult;
+  try {
+    rateLimitResult = await checkRateLimit(rateLimiters?.thread, ip);
+  } catch (e) {
+    rateLimitResult = { success: true, headers: {} };
+  }
+
+  const { success, headers } = rateLimitResult;
 
   if (!success) {
     return new NextResponse('Too Many Requests', {
@@ -33,9 +58,15 @@ export async function GET(request) {
       return new NextResponse('invalid site', { status: 400, headers: getCorsHeaders(origin) });
     }
 
-    const validOrigin = checkOrigin(origin, site.domain);
-    if (!validOrigin) {
-      return new NextResponse('invalid origin', { status: 400, headers: getCorsHeaders(origin) });
+    // Check origin if provided and if site has a domain configured
+    if (origin && site.domain) {
+      const validOrigin = checkOrigin(origin, site.domain);
+      if (!validOrigin) {
+        return new NextResponse('invalid origin', { status: 400, headers: getCorsHeaders(origin) });
+      }
+    } else if (!origin && process.env.NODE_ENV !== 'development') {
+      // In production, require origin header for security
+      return new NextResponse('missing origin header', { status: 400, headers: getCorsHeaders(origin) });
     }
 
     const { data: comments, error } = await supabaseAdmin
