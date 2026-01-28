@@ -2,26 +2,28 @@
   "compilerOptions": {
     // Language and Environment
     "target": "ES2020",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "jsx": "preserve",
-
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "jsx": "react-jsx",
     // Module Resolution
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
-
     // Emit
     "noEmit": true,
     "incremental": true,
-
     // JavaScript Support
     "allowJs": true,
     "checkJs": false,
-
     // Type Checking (Strict Mode)
     "strict": true,
     "noUnusedLocals": true,
@@ -29,13 +31,11 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true,
-
     // Interop Constraints
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-
     // Next.js Specific
     "plugins": [
       {
@@ -47,7 +47,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

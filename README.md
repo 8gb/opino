@@ -10,7 +10,7 @@ Opino solves the problem of adding dynamic comments to static sites (Jekyll, Hug
 *   **Privacy Focused**: No tracking cookies, no ads, no third-party data harvesting.
 *   **Static Site Optimized**: Works with any HTML page via a simple embed code.
 *   **Secure**: Built-in CORS protection and Supabase Row Level Security (RLS).
-*   **Modern Stack**: React 17 Widget + Next.js 14 (Edge Runtime) + Supabase.
+*   **Modern Stack**: React 17 Widget + Next.js 16 + Supabase.
 
 ## Documentation
 
@@ -31,7 +31,7 @@ Opino is built on a modern, serverless architecture designed for performance and
     *   **Privacy**: Does not use cookies or local storage tracking.
 
 2.  **Opino Platform (Server-Side)**
-    *   **Technology**: Next.js 14 (App Router), Vercel Edge Functions.
+    *   **Technology**: Next.js 16 (App Router), Vercel Edge Functions.
     *   **Role**: Serves as the API gateway and Admin Dashboard.
     *   **API**: Exposes REST endpoints (`/api/thread`, `/api/add`) running on the Edge for low latency. Handles CORS validation to ensure requests originate from authorized domains.
 
@@ -89,6 +89,55 @@ The fastest way to get started is using the official hosted instance.
 ```
 
 For more details on configuration and styling, see the **[Widget Documentation](WIDGET.md)**.
+
+## Development
+
+### Prerequisites
+
+- Node.js >= 18.0.0
+- npm >= 8.0.0
+
+### Setup
+
+```bash
+# Install root dependencies (widget build tools)
+npm install
+
+# Install app dependencies
+cd opino-app && npm install --legacy-peer-deps
+```
+
+### Commands
+
+All commands are run from the root directory:
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start widget watcher + Next.js dev server |
+| `npm run build` | Build widget and Next.js app for production |
+| `npm run start` | Start the Next.js production server |
+| `npm run test` | Run tests |
+| `npm run lint` | Run linting |
+
+### Project Structure
+
+```
+opino/
+├── index.js              # Widget source (React component)
+├── index.css             # Widget styles
+├── prod.config.js        # Webpack config for widget
+├── dist/                 # Built widget bundle
+│   └── main.js
+└── opino-app/            # Next.js CMS Dashboard & API
+    ├── src/
+    │   ├── app/          # Next.js App Router
+    │   │   ├── api/      # REST API endpoints
+    │   │   └── ...       # Dashboard pages
+    │   ├── components/
+    │   └── lib/
+    └── public/
+        └── main.js       # Widget (copied during build)
+```
 
 ## Project Status
 

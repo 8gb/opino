@@ -1,13 +1,20 @@
 {
-  "name": "comment",
+  "name": "opino",
   "version": "1.0.0",
   "description": "Privacy focused comment system for static website.",
   "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack --config prod.config.js --watch",
-    "build": "webpack --config prod.config.js"
+    "predev": "npm run build:widget && mkdir -p opino-app/public && rm -f opino-app/public/main.js && ln -s ../../dist/main.js opino-app/public/main.js",
+    "dev": "concurrently -n widget,app -c blue,green \"npm run dev:widget\" \"npm run dev:app\"",
+    "dev:widget": "webpack --config prod.config.js --watch",
+    "dev:app": "npm run --prefix opino-app dev",
+    "build": "npm run build:widget && npm run build:app",
+    "build:widget": "webpack --config prod.config.js",
+    "build:app": "npm run --prefix opino-app build",
+    "start": "npm run --prefix opino-app start",
+    "test": "npm run --prefix opino-app test",
+    "lint": "npm run --prefix opino-app lint"
   },
   "author": "",
   "license": "ISC",
@@ -22,6 +29,7 @@
     "@babel/preset-env": "^7.14.0",
     "@babel/preset-react": "^7.13.13",
     "babel-loader": "^10.0.0",
+    "concurrently": "^9.1.2",
     "css-loader": "^6.11.0",
     "style-loader": "^3.3.4",
     "webpack": "^5.104.1",

@@ -35,7 +35,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "prebuild": "mkdir -p public && cp ../dist/main.js public/main.js",
+    "prebuild": "mkdir -p public && rm -f public/main.js && cp ../dist/main.js public/main.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

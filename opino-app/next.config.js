@@ -34,6 +34,9 @@ const securityHeaders = [
 
 const nextConfig = {
   transpilePackages: ['antd'],
+  turbopack: {
+    root: '..',
+  },
   async headers() {
     return [
       {
