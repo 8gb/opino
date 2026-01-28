@@ -144,8 +144,10 @@ export async function POST(request) {
 
     // Invalidate cache for this thread after adding comment
     await invalidateCache(cacheKeys.comments(siteName, pathName));
-    // Also invalidate user's comment list cache
+    // Also invalidate user's comment list cache, stats, and sites list (for comment counts)
     await invalidateCachePattern(`comments:list:${site.uid}:*`);
+    await invalidateCachePattern(`stats:${site.uid}`);
+    await invalidateCachePattern(`sites:list:${site.uid}`);
 
     return new NextResponse(null, { status: 200, headers: getCorsHeaders(origin) });
 

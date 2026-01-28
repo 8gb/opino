@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import supabaseAdmin from '@/lib/supabase-server';
 import { withAuth } from '@/lib/auth-middleware';
+import { invalidateCachePattern, invalidateCache, cacheKeys } from '@/lib/cache';
 
 export const PUT = withAuth(async (request, { user, params }) => {
   const { id } = await params;
@@ -25,6 +26,10 @@ export const PUT = withAuth(async (request, { user, params }) => {
 
     if (error) throw error;
 
+    // Invalidate cache for sites list and specific site after update
+    await invalidateCachePattern(`sites:list:${user.uid}`);
+    await invalidateCache(cacheKeys.site(id));
+
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -46,6 +51,12 @@ export const DELETE = withAuth(async (request, { user, params }) => {
 
     const { error } = await supabaseAdmin.from('sites').delete().eq('id', id);
     if (error) throw error;
+
+    // Invalidate cache for sites list, stats, and all comments for this site after deletion
+    await invalidateCachePattern(`sites:list:${user.uid}`);
+    await invalidateCachePattern(`stats:${user.uid}`);
+    await invalidateCachePattern(`comments:${id}:*`);
+    await invalidateCache(cacheKeys.site(id));
 
     return NextResponse.json({ success: true });
   } catch (error) {

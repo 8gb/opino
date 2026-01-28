@@ -13,10 +13,10 @@ try {
 
 // Cache TTL configurations (in seconds)
 export const CACHE_TTL = {
-  COMMENTS: 300,      // 5 minutes
-  SITE: 600,          // 10 minutes
-  STATS: 180,         // 3 minutes
-  DEFAULT: 300,       // 5 minutes
+  COMMENTS: 604800,   // 1 week
+  SITE: 604800,       // 1 week
+  STATS: 604800,      // 1 week
+  DEFAULT: 604800,    // 1 week
 };
 
 /**

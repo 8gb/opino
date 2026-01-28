@@ -2,28 +2,38 @@ import { NextResponse } from 'next/server';
 import supabaseAdmin from '@/lib/supabase-server';
 import { withAuth } from '@/lib/auth-middleware';
 import { SiteSchema, validate } from '@/lib/validation';
+import { getCached, invalidateCachePattern, cacheKeys, CACHE_TTL } from '@/lib/cache';
 
 export const GET = withAuth(async (request, { user }) => {
   try {
-    // 1. Fetch sites first
-    let query = supabaseAdmin.from('sites').select('*');
-    query = query.eq('uid', user.uid);
-    const { data: sites, error } = await query.order('_created_at', { ascending: false });
+    // Use cache for sites list with comment counts
+    const sitesWithCounts = await getCached(
+      cacheKeys.sitesList(user.uid),
+      async () => {
+        // 1. Fetch sites first
+        let query = supabaseAdmin.from('sites').select('*');
+        query = query.eq('uid', user.uid);
+        const { data: sites, error } = await query.order('_created_at', { ascending: false });
 
-    if (error) throw error;
+        if (error) throw error;
 
-    // 2. Fetch comment counts for each site in parallel
-    const sitesWithCounts = await Promise.all(sites.map(async (site) => {
-        const { count, error: countError } = await supabaseAdmin
-            .from('comments')
-            .select('*', { count: 'exact', head: true })
-            .eq('sitename', site.id);
+        // 2. Fetch comment counts for each site in parallel
+        const sitesWithCounts = await Promise.all(sites.map(async (site) => {
+            const { count, error: countError } = await supabaseAdmin
+                .from('comments')
+                .select('*', { count: 'exact', head: true })
+                .eq('sitename', site.id);
 
-        return {
-            ...site,
-            comments: [{ count: count || 0 }]
-        };
-    }));
+            return {
+                ...site,
+                comments: [{ count: count || 0 }]
+            };
+        }));
+
+        return sitesWithCounts;
+      },
+      CACHE_TTL.SITE
+    );
 
     return NextResponse.json(sitesWithCounts);
   } catch (error) {
@@ -52,6 +62,10 @@ export const POST = withAuth(async (request, { user }) => {
     const { data, error } = await supabaseAdmin.from('sites').insert([newSite]).select();
 
     if (error) throw error;
+
+    // Invalidate cache for sites list and stats after adding a new site
+    await invalidateCachePattern(`sites:list:${user.uid}`);
+    await invalidateCachePattern(`stats:${user.uid}`);
 
     return NextResponse.json(data[0]);
   } catch (error) {

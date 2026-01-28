@@ -24,8 +24,10 @@ export const DELETE = withAuth(async (request, { user, params }) => {
     if (existing.sitename && existing.pathname) {
       await invalidateCache(cacheKeys.comments(existing.sitename, existing.pathname));
     }
-    // Invalidate user's comment list cache
+    // Invalidate user's comment list cache, stats, and sites list (for comment counts)
     await invalidateCachePattern(`comments:list:${user.uid}:*`);
+    await invalidateCachePattern(`stats:${user.uid}`);
+    await invalidateCachePattern(`sites:list:${user.uid}`);
 
     return NextResponse.json({ success: true });
   } catch (error) {
